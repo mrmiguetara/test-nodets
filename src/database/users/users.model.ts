@@ -1,8 +1,9 @@
 import * as Mongoose from "mongoose";
+import IUser from "../../interfaces/user.interface";
 
 export const UserSchema = new Mongoose.Schema({
-    firstName: String,
-    lastName: String,
+    firstName: {type: String, required: [true, "First name is required."]},
+    lastName: {type: String, required: [true, "Lastname is Required"]},
     age: Number,
     dateOfEntry: {
         type: Date,
@@ -14,4 +15,4 @@ export const UserSchema = new Mongoose.Schema({
     }
 })
 
-export const UserModel = Mongoose.model("User", UserSchema);
+export const UserModel = Mongoose.model<IUser>("User", UserSchema);

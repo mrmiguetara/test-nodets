@@ -1,6 +1,13 @@
 import express from 'express'
+import mongoose from 'mongoose'
 import { Application } from 'express'
 import IControllerBase from './interfaces/controllerBase';
+import config from '../config/index';
+
+const DB_USER = config.dbUser;
+const PASSWORD = config.dbPassword;
+const DB_NAME = config.dbName;
+const MONGO_URI = `mongodb+srv://${DB_USER}:${PASSWORD}@${config.dbHost}/${DB_NAME}?retryWrites=true&w=majority`;
 
 class App {
     public app: Application
@@ -10,8 +17,9 @@ class App {
         this.app = express();
         this.port = appInit.port
 
-        this.middlewares(appInit.middleWares)
+        this.initMongoConnection();
         this.routes(appInit.controllers)
+        this.middlewares(appInit.middleWares)
         this.assets()
         this.template()
     }
@@ -27,6 +35,15 @@ class App {
             console.log(controller.path)
             this.app.use(controller.path, controller.router)
         })
+    }
+
+    private initMongoConnection() {
+        mongoose.connect(MONGO_URI, {
+            useNewUrlParser: true,
+            useFindAndModify: true,
+            useUnifiedTopology: true,
+            useCreateIndex: true,
+        });
     }
 
     private assets() {

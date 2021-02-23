@@ -1,9 +1,9 @@
 import * as express from 'express'
-import { Request, Response } from 'express'
+import { Request, Response, NextFunction } from 'express';
 import IControllerBase from '../interfaces/controllerBase'
-import User from '../interfaces/user.interface';
-import { UserModel } from '../database/users/users.model';
 import { UserService } from '../services/user.service';
+import IUser from '../interfaces/user.interface';
+import { HttpError } from '../errors/http.error';
 class HomeController implements IControllerBase {
     public path = '/api/users'
     public router = express.Router()
@@ -13,26 +13,34 @@ class HomeController implements IControllerBase {
     }
 
     public initRoutes() {
-        this.router.get('/', this.service.getAll);
+        this.router.get('/', this.getAll);
         this.router.get('/:id', this.retrieve);
         this.router.post('/', this.create);
     }
-    retrieve = (req: Request, res: Response) => {
-        const id: number = Number(req.params.id);
-        // const user = this.users.find(u => u.id == id);
 
-        // res.json( {user} )
+    getAll = async (req: Request, res: Response) => {
+        const users = await this.service.getAll();
+        res.status(200).json({users});
     }
 
-    create = (req: Request, res: Response) => {
-        const user: User = req.body;
+    retrieve = async (req: Request, res: Response, next: NextFunction) => {
+        const id = req.params.id
+        try {
+            const user = await this.service.get(id);
+            if (user) {
+                res.status(200).json({user})
+            }
 
-        // if (this.users.find( u => u.id == user.id)) {
-        //     res.status(400).json({'message': 'there\'s a user with that id'});
-        // }
-        // this.users.push(user);
+        } catch (err ) {
+            next(new HttpError(`User with id ${id} not found`, 404))
+        }
+    }
 
-        res.status(201).json({userId: user.id, message: 'user created'});
+    create = async (req: Request, res: Response) => {
+        const user: IUser = await this.service.create(req.body);
+
+        res.status(201).json(user);
+
     }
 }
 

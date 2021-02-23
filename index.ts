@@ -16,6 +16,7 @@ import * as bodyParser from 'body-parser'
 
 // import PostsController from './controllers/posts/posts.controller'
 import HomeController from './src/controllers/user.controller';
+import { handleErrors } from './src/middlewares/error-handler.middleware';
 
 const app = new App({
     port: config.port,
@@ -26,6 +27,7 @@ const app = new App({
     middleWares: [
         bodyParser.json(),
         bodyParser.urlencoded({ extended: true }),
+        handleErrors
         // loggerMiddleware
     ]
 })

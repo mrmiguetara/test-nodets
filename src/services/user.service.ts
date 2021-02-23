@@ -1,18 +1,23 @@
-import { NextFunction, Request, Response } from "express";
+// import { NextFunction, Request, Response } from "express";
 //importing our model
 import { UserModel } from "../database/users/users.model";
-import { connect, disconnect } from "../database/database";
-import { Document } from 'mongoose';
+import { Document, Error, ObjectId } from 'mongoose';
+import IUser from "../interfaces/user.interface";
+import { HttpError } from '../errors/http.error';
 
 export class UserService {
-  public async getAll(req: Request, res: Response, next: NextFunction) {
-    try {
-      await connect();
-      const users = await UserModel.find({});
-      await disconnect();
-      res.status(200).json({users})
-    } catch (error) {
-      next(error)
-    }
+  public getAll(): Promise<IUser[]>{
+    return UserModel.find({}).exec();
   }
+
+  public async get(id: string): Promise<IUser|null> {
+    return UserModel.findById({_id: id}).exec();
+
+  }
+
+  public create(user: IUser): Promise<IUser> {
+    const newUser = new UserModel(user);
+    return newUser.save();
+  }
+  
 }
